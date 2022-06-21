@@ -1,23 +1,23 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import math
-import torch
+import torch # so, this is the library to
+import torch.nn as nn # neural-network stuff
+import torch.nn.functional as F # function interface of the functions
+import math # math-plugion
+import torch # torch-torch
 
 from torch import nn
-from torch.nn import init
-from torch.nn import functional as F
-from torch.autograd import Function
-
-from math import sqrt
-
-import random
+from torch.nn import init # init weights and biases
+from torch.nn import functional as F # functional interface
+from torch.autograd import Function # Function is my function
+from math import sqrt # what are these squares???
+import random # the random module
 
 class ConvBlock(torch.nn.Module):
     def __init__(self, input_size, output_size, kernel_size=3, stride=1, padding=1, bias=True, activation='prelu', norm=None):
         super(ConvBlock, self).__init__()
+        # so the whole thing above is for this one
         self.conv = torch.nn.Conv2d(input_size, output_size, kernel_size, stride, padding, bias=bias)
 
+        # for normalization I either use
         self.norm = norm
         if self.norm =='batch':
             self.bn = torch.nn.BatchNorm2d(output_size)
