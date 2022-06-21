@@ -6,7 +6,7 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
 from data import TrainData
-from val_data_functions import ValData
+from data import ValData
 from utils import to_psnr, print_log, validation, adjust_learning_rate
 from torchvision.models import vgg16
 from perceptual import LossNetwork
@@ -14,7 +14,7 @@ import os
 import numpy as np
 import random
 
-from transweather_model import Transweather,Transweather_base
+from transweather_model import Transweather
 
 plt.switch_backend('agg')
 
@@ -48,7 +48,7 @@ if seed is not None:
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
-    random.seed(seed) 
+    random.seed(seed)
     print('Seed:\t{}'.format(seed))
 
 print('--- Hyper-parameters for training ---')
@@ -65,7 +65,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 # --- Define the network --- #
-net = Transweather_base()
+net = Transweather()
 
 
 # --- Build optimizer --- #
@@ -85,8 +85,8 @@ for param in vgg_model.parameters():
     param.requires_grad = False
 
 # --- Load the network weight --- #
-if os.path.exists('./{}/'.format(exp_name))==False:     
-    os.mkdir('./{}/'.format(exp_name))  
+if os.path.exists('./{}/'.format(exp_name))==False:
+    os.mkdir('./{}/'.format(exp_name))
 try:
     net.load_state_dict(torch.load('./{}/best'.format(exp_name)))
     print('--- weight loaded ---')
@@ -94,6 +94,8 @@ except:
     print('--- no weight loaded ---')
 
 
+# pytorch_total_params = sum(p.numel() for p in net.parameters() if p.requires_grad)
+# print("Total_params: {}".format(pytorch_total_params))
 loss_network = LossNetwork(vgg_model)
 loss_network.eval()
 
@@ -101,23 +103,40 @@ loss_network.eval()
 
 ### The following file should be placed inside the directory "./data/train/"
 
-labeled_name = 'rain800.txt' # Change this based on the dataset you choose to train on
+labeled_name = 'allweather.txt'
 
 ### The following files should be placed inside the directory "./data/test/"
 
-val_filename1 = 'rain800_test.txt' # Change this based on the dataset you choose to test on
+# val_filename = 'val_list_rain800.txt'
+val_filename1 = 'raindroptesta.txt'
+# val_filename2 = 'test1.txt'
 
 # --- Load training data and validation/test data --- #
 lbl_train_data_loader = DataLoader(TrainData(crop_size, train_data_dir,labeled_name), batch_size=train_batch_size, shuffle=True, num_workers=8)
+
+## Uncomment the other validation data loader to keep an eye on performance
+## but note that validating while training significantly increases the train time
+
+# val_data_loader = DataLoader(ValData(val_data_dir,val_filename), batch_size=val_batch_size, shuffle=False, num_workers=8)
 val_data_loader1 = DataLoader(ValData(val_data_dir,val_filename1), batch_size=val_batch_size, shuffle=False, num_workers=8)
+# val_data_loader2 = DataLoader(ValData(val_data_dir,val_filename2), batch_size=val_batch_size, shuffle=False, num_workers=8)
+
 
 # --- Previous PSNR and SSIM in testing --- #
 net.eval()
 
+################ Note########################
 
+## Uncomment the other validation data loader to keep an eye on performance
+## but note that validating while training significantly increases the test time
+
+# old_val_psnr, old_val_ssim = validation(net, val_data_loader, device, exp_name)
 old_val_psnr1, old_val_ssim1 = validation(net, val_data_loader1, device, exp_name)
+# old_val_psnr2, old_val_ssim2 = validation(net, val_data_loader2, device, exp_name)
 
-print('Rain 800 old_val_psnr: {0:.2f}, old_val_ssim: {1:.4f}'.format(old_val_psnr1, old_val_ssim1))
+# print('Rain 800 old_val_psnr: {0:.2f}, old_val_ssim: {1:.4f}'.format(old_val_psnr, old_val_ssim))
+print('Rain Drop old_val_psnr: {0:.2f}, old_val_ssim: {1:.4f}'.format(old_val_psnr1, old_val_ssim1))
+# print('Test1 old_val_psnr: {0:.2f}, old_val_ssim: {1:.4f}'.format(old_val_psnr2, old_val_ssim2))
 
 net.train()
 
@@ -142,7 +161,7 @@ for epoch in range(epoch_start,num_epochs):
         smooth_loss = F.smooth_l1_loss(pred_image, gt)
         perceptual_loss = loss_network(pred_image, gt)
 
-        loss = smooth_loss + lambda_loss*perceptual_loss 
+        loss = smooth_loss + lambda_loss*perceptual_loss
 
         loss.backward()
         optimizer.step()
@@ -162,15 +181,22 @@ for epoch in range(epoch_start,num_epochs):
     # --- Use the evaluation model in testing --- #
     net.eval()
 
+    # val_psnr, val_ssim = validation(net, val_data_loader, device, exp_name)
     val_psnr1, val_ssim1 = validation(net, val_data_loader1, device, exp_name)
+    # val_psnr2, val_ssim2 = validation(net, val_data_loader2, device, exp_name)
 
     one_epoch_time = time.time() - start_time
-
-    print("Rain 800")
+    # print("Rain 800")
+    # print_log(epoch+1, num_epochs, one_epoch_time, train_psnr, val_psnr, val_ssim, exp_name)
+    print("Rain Drop")
     print_log(epoch+1, num_epochs, one_epoch_time, train_psnr, val_psnr1, val_ssim1, exp_name)
+    # print("Test1")
+    # print_log(epoch+1, num_epochs, one_epoch_time, train_psnr, val_psnr2, val_ssim2, exp_name)
 
     # --- update the network weight --- #
     if val_psnr1 >= old_val_psnr1:
         torch.save(net.state_dict(), './{}/best'.format(exp_name))
         print('model saved')
         old_val_psnr1 = val_psnr1
+
+        # Note that we find the best model based on validating with raindrop data. 

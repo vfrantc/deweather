@@ -5,8 +5,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-from train_data_functions import TrainData
-from val_data_functions import ValData
+from data import TrainData
+from data import ValData
 from utils import to_psnr, print_log, validation, adjust_learning_rate
 from torchvision.models import vgg16
 from perceptual import LossNetwork
