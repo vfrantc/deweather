@@ -103,12 +103,12 @@ loss_network.eval()
 
 ### The following file should be placed inside the directory "./data/train/"
 
-labeled_name = 'allweather.txt'
+labeled_name = 'reside.txt'
 
 ### The following files should be placed inside the directory "./data/test/"
 
 # val_filename = 'val_list_rain800.txt'
-val_filename1 = 'raindroptesta.txt'
+val_filename1 = 'outdoor.txt'
 # val_filename2 = 'test1.txt'
 
 # --- Load training data and validation/test data --- #
