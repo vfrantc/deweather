@@ -33,11 +33,7 @@ class TrainData(data.Dataset):
 
         input_img = Image.open(self.train_data_dir + input_name)
 
-
-        try:
-            gt_img = Image.open(self.train_data_dir + gt_name)
-        except:
-            gt_img = Image.open(self.train_data_dir + gt_name).convert('RGB')
+        gt_img = Image.open(self.train_data_dir + gt_name).convert('RGB')
 
         width, height = input_img.size
 
