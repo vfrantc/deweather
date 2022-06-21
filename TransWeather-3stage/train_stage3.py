@@ -13,11 +13,10 @@ from perceptual import LossNetwork
 import os
 import numpy as np
 import random
+from transweather_model import Transweather_stages as Transweather
 
-from transweather_model import Transweather
 
 plt.switch_backend('agg')
-
 # --- Parse hyper-parameters  --- #
 parser = argparse.ArgumentParser(description='Hyper-parameters for network')
 parser.add_argument('-learning_rate', help='Set the learning rate', default=2e-4, type=float)
@@ -199,4 +198,4 @@ for epoch in range(epoch_start,num_epochs):
         print('model saved')
         old_val_psnr1 = val_psnr1
 
-        # Note that we find the best model based on validating with raindrop data. 
+        # Note that we find the best model based on validating with raindrop data.
