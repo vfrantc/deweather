@@ -65,7 +65,7 @@ class TrainData(data.Dataset):
 
         # --- Check the channel is 3 or not --- #
         if list(input_im.shape)[0] is not 3 or list(gt.shape)[0] is not 3:
-            raise Exception('Bad image channel: {} {}'.format(gt_name, input_im.shape, gt.shape))
+            raise Exception('Bad image channel: {} {} {}'.format(gt_name, input_im.shape, gt.shape))
 
         return input_im, gt, img_id
 
