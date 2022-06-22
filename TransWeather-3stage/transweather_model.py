@@ -1000,12 +1000,12 @@ class Transweather_stages(nn.Module):
         torch.cuda.empty_cache()
 
 def get_dehaze(trainable=False):
-  dehaze_net = Transweather()
-  dehaze_net = dehaze_net.cuda()
-  for param in dehaze_net.parameters():
+    dehaze_net = Transweather()
+    dehaze_net = dehaze_net.cuda()
+    for param in dehaze_net.parameters():
       param.requires_grad = False
-  dehaze_net.load_state_dict(torch.load('./trained/best'))
-  return dehaze_net
+    dehaze_net.load_state_dict(torch.load('./trained/best'), strict=False)
+    return dehaze_net
 
 if __name__ == "__main__":
     import torchsummary
