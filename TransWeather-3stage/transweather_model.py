@@ -959,7 +959,7 @@ class Transweather(nn.Module):
 class Transweather_stages(nn.Module):
 
     def __init__(self, path=None, **kwargs):
-        super(Transweather, self).__init__()
+        super(Transweather_stages, self).__init__()
 
         self.decomp = get_decom(trainable=False)
         self.dehaze = get_dehaze(trainable=False)
