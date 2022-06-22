@@ -7,17 +7,24 @@ from PIL import ImageFile
 from os import path
 import numpy as np
 import torch
+
+import torch.utils.data as data
+from PIL import Image
+from torchvision.transforms import Compose, ToTensor, Normalize
+import numpy as np
+
 ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 
 # --- Training dataset --- #
 class TrainData(data.Dataset):
-    def __init__(self, crop_size, train_data_dir,train_filename):
+    def __init__(self, crop_size, train_data_dir, train_filename):
         super().__init__()
         train_list = train_data_dir + train_filename
         with open(train_list) as f:
             contents = f.readlines()
-            input_names = [i.strip() for i in contents]
-            gt_names = [i.strip().replace('input','gt') for i in input_names]
+            input_names = [i.strip().replace('./', '') for i in contents]
+            gt_names = [i.strip().replace('input', 'gt') for i in input_names]
 
         self.input_names = input_names
         self.gt_names = gt_names
@@ -29,10 +36,9 @@ class TrainData(data.Dataset):
         input_name = self.input_names[index]
         gt_name = self.gt_names[index]
 
-        img_id = re.split('/',input_name)[-1][:-4]
+        img_id = re.split('/', input_name)[-1][:-4]
 
         input_img = Image.open(self.train_data_dir + input_name)
-
 
         try:
             gt_img = Image.open(self.train_data_dir + gt_name)
@@ -41,14 +47,14 @@ class TrainData(data.Dataset):
 
         width, height = input_img.size
 
-        if width < crop_width and height < crop_height :
-            input_img = input_img.resize((crop_width,crop_height), Image.ANTIALIAS)
+        if width < crop_width and height < crop_height:
+            input_img = input_img.resize((crop_width, crop_height), Image.ANTIALIAS)
             gt_img = gt_img.resize((crop_width, crop_height), Image.ANTIALIAS)
-        elif width < crop_width :
-            input_img = input_img.resize((crop_width,height), Image.ANTIALIAS)
-            gt_img = gt_img.resize((crop_width,height), Image.ANTIALIAS)
-        elif height < crop_height :
-            input_img = input_img.resize((width,crop_height), Image.ANTIALIAS)
+        elif width < crop_width:
+            input_img = input_img.resize((crop_width, height), Image.ANTIALIAS)
+            gt_img = gt_img.resize((crop_width, height), Image.ANTIALIAS)
+        elif height < crop_height:
+            input_img = input_img.resize((width, crop_height), Image.ANTIALIAS)
             gt_img = gt_img.resize((width, crop_height), Image.ANTIALIAS)
 
         width, height = input_img.size
@@ -76,14 +82,15 @@ class TrainData(data.Dataset):
     def __len__(self):
         return len(self.input_names)
 
+
 class TrainData_new(data.Dataset):
-    def __init__(self, crop_size, train_data_dir,train_filename):
+    def __init__(self, crop_size, train_data_dir, train_filename):
         super().__init__()
         train_list = train_data_dir + train_filename
         with open(train_list) as f:
             contents = f.readlines()
             input_names = [i.strip() for i in contents]
-            gt_names = [i.strip().replace('input','gt') for i in input_names]
+            gt_names = [i.strip().replace('input', 'gt') for i in input_names]
 
         self.input_names = input_names
         self.gt_names = gt_names
@@ -94,10 +101,9 @@ class TrainData_new(data.Dataset):
         crop_width, crop_height = self.crop_size
         input_name = self.input_names[index]
         gt_name = self.gt_names[index]
-        img_id = re.split('/',input_name)[-1][:-4]
-        
-        input_img = Image.open(self.train_data_dir + input_name)
+        img_id = re.split('/', input_name)[-1][:-4]
 
+        input_img = Image.open(self.train_data_dir + input_name)
 
         try:
             gt_img = Image.open(self.train_data_dir + gt_name)
@@ -107,14 +113,14 @@ class TrainData_new(data.Dataset):
         width, height = input_img.size
         tmp_ch = 0
 
-        if width < crop_width and height < crop_height :
-            input_img = input_img.resize((crop_width,crop_height), Image.ANTIALIAS)
+        if width < crop_width and height < crop_height:
+            input_img = input_img.resize((crop_width, crop_height), Image.ANTIALIAS)
             gt_img = gt_img.resize((crop_width, crop_height), Image.ANTIALIAS)
-        elif width < crop_width :
-            input_img = input_img.resize((crop_width,height), Image.ANTIALIAS)
-            gt_img = gt_img.resize((crop_width,height), Image.ANTIALIAS)
-        elif height < crop_height :
-            input_img = input_img.resize((width,crop_height), Image.ANTIALIAS)
+        elif width < crop_width:
+            input_img = input_img.resize((crop_width, height), Image.ANTIALIAS)
+            gt_img = gt_img.resize((crop_width, height), Image.ANTIALIAS)
+        elif height < crop_height:
+            input_img = input_img.resize((width, crop_height), Image.ANTIALIAS)
             gt_img = gt_img.resize((width, crop_height), Image.ANTIALIAS)
 
         width, height = input_img.size
@@ -129,14 +135,12 @@ class TrainData_new(data.Dataset):
         input_im = transform_input(input_crop_img)
         gt = transform_gt(gt_crop_img)
 
-        
         # --- Check the channel is 3 or not --- #
         # print(input_im.shape)
         if list(input_im.shape)[0] is not 3 or list(gt.shape)[0] is not 3:
             raise Exception('Bad image channel: {}'.format(gt_name))
 
-
-        return input_im, gt, img_id,R_map,trans_map
+        return input_im, gt, img_id, R_map, trans_map
 
     def __getitem__(self, index):
         res = self.get_images(index)
@@ -145,10 +149,6 @@ class TrainData_new(data.Dataset):
     def __len__(self):
         return len(self.input_names)
 
-import torch.utils.data as data
-from PIL import Image
-from torchvision.transforms import Compose, ToTensor, Normalize
-import numpy as np
 
 # --- Validation/test dataset --- #
 class ValData(data.Dataset):
@@ -157,8 +157,8 @@ class ValData(data.Dataset):
         val_list = val_data_dir + val_filename
         with open(val_list) as f:
             contents = f.readlines()
-            input_names = [i.strip() for i in contents]
-            gt_names = [i.strip().replace('input','gt') for i in input_names]
+            input_names = [i.strip().replace('./', '') for i in contents]
+            gt_names = [i.strip().replace('input','gt').replace('_rain.png', '_clean.png') for i in input_names]
 
         self.input_names = input_names
         self.gt_names = gt_names
