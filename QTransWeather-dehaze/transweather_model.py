@@ -9,9 +9,6 @@ from torch.nn.init import _calculate_fan_in_and_fan_out
 from itertools import repeat
 import collections.abc
 
-from decomp import get_decom
-#from dehaze import get_dehaze
-
 
 # From PyTorch internals
 def _ntuple(n):
@@ -954,57 +951,6 @@ class Transweather(nn.Module):
         del checkpoint
         torch.cuda.empty_cache()
 
-
-
-class Transweather_stages(nn.Module):
-
-    def __init__(self, path=None, **kwargs):
-        super(Transweather_stages, self).__init__()
-
-        self.decomp = get_decom(trainable=False)
-        self.dehaze = get_dehaze(trainable=False)
-
-
-
-        self.Tenc = Tenc()
-        self.Tdec = Tdec()
-        self.convtail = convprojection()
-        self.clean = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
-        self.active = nn.Tanh()
-
-        if path is not None:
-            self.load(path)
-
-    def forward(self, x):
-        R, I = self.decomp(x)
-        I = self.dehaze(I)
-
-
-        x1 = self.Tenc(R)
-        x2 = self.Tdec(x1)
-        x = self.convtail(x1, x2)
-        clean = self.active(self.clean(x))
-
-        return clean*I
-
-    def load(self, path):
-        """
-        Load checkpoint.
-        """
-        checkpoint = torch.load(path, map_location=lambda storage, loc: storage)
-        model_state_dict_keys = self.state_dict().keys()
-        checkpoint_state_dict_noprefix = strip_prefix_if_present(checkpoint['state_dict'], "module.")
-        self.load_state_dict(checkpoint_state_dict_noprefix, strict=False)
-        del checkpoint
-        torch.cuda.empty_cache()
-
-def get_dehaze(trainable=False):
-    dehaze_net = Transweather()
-    dehaze_net = dehaze_net.cuda()
-    for param in dehaze_net.parameters():
-      param.requires_grad = False
-    dehaze_net.load_state_dict(torch.load('./trained/best'), strict=False)
-    return dehaze_net
 
 if __name__ == "__main__":
     import torchsummary
