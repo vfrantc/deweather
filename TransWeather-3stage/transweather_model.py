@@ -977,6 +977,7 @@ class Transweather_stages(nn.Module):
 
     def forward(self, x):
         R, I = self.decomp(x)
+        R = R - 1
         I = self.dehaze(I)
 
 
@@ -985,7 +986,7 @@ class Transweather_stages(nn.Module):
         x = self.convtail(x1, x2)
         clean = self.active(self.clean(x))
 
-        return clean*I
+        return (clean/255+1)*(I/255)*255
 
     def load(self, path):
         """
