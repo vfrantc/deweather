@@ -976,12 +976,9 @@ class Transweather_stages(nn.Module):
             self.load(path)
 
     def forward(self, x):
-        R, I = self.decomp(x)
-
-        # I need to normalize R here
-        R = R
-
-
+        R, I = self.decomp(x) # Here R
+        R = 2*R - 1
+        I = 2*I - 1
         I = self.dehaze(I)
 
 
@@ -990,7 +987,7 @@ class Transweather_stages(nn.Module):
         x = self.convtail(x1, x2)
         clean = self.active(self.clean(x))
 
-        return (clean/255)*(I/255)*255
+        return clean*I
 
     def load(self, path):
         """
