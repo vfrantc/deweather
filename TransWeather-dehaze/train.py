@@ -169,6 +169,7 @@ for epoch in range(epoch_start,num_epochs):
         # --- To calculate average PSNR --- #
         psnr_list.extend(to_psnr(pred_image, gt))
 
+
         #print('Input image: {}..{}', input_image.min().item(), input_image.max().item())
         #print('Gt image: {}..{}', gt.min().item(), gt.max().item())
         #print('Pred image: {}..{}', pred_image.min().item(), pred_image.max().item())
