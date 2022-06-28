@@ -980,11 +980,23 @@ class Transweather_stages(nn.Module):
         R, I = self.decomp(x)
         print('R: {} {} ... {}'.format(R.size(), R.min().item(), R.max().item()))
         print('I: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
+
+
+        Io = self.dehaze(I)
+        print('I dehazed no norm: {} {} ... {}'.format(Io.size(), Io.min().item(), Io.max().item()))
+
+        mult = R*Io
+        print('Reconstructed no norm: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
+
+        I = 2 * I - 1
+        print('I after norm: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
         I = self.dehaze(I)
-        print('I dehazed: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
+        print('I dehazed after norm: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
 
         mult = R*I
         print('Reconstructed: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
+
+
         #R = 2*R - 1 # to put it into range -1..1
         #I = 2*I - 1 # to put it into range -1..1
         #I = self.dehaze(I)
