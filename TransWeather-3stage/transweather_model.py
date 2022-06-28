@@ -977,17 +977,18 @@ class Transweather_stages(nn.Module):
 
     def forward(self, x):
         R, I = self.decomp(x) # Here R
-        R = 2*R - 1
-        I = 2*I - 1
+        R = 2*R - 1 # to put it into range -1..1
+        I = 2*I - 1 # to put it into range -1..1
         I = self.dehaze(I)
 
 
         x1 = self.Tenc(R)
         x2 = self.Tdec(x1)
         x = self.convtail(x1, x2)
-        clean = self.active(self.clean(x))
+        clean = self.active(self.clean(x)) # activation on top of 0..1
 
-        return clean*I
+        #return clean*I
+        return I
 
     def load(self, path):
         """
