@@ -977,9 +977,9 @@ class Transweather_stages(nn.Module):
 
     def forward(self, x):
         R, I = self.decomp(x) # Here R
-        R = 2*R - 1 # to put it into range -1..1
-        I = 2*I - 1 # to put it into range -1..1
-        I = self.dehaze(I)
+        #R = 2*R - 1 # to put it into range -1..1
+        #I = 2*I - 1 # to put it into range -1..1
+        #I = self.dehaze(I)
 
 
         x1 = self.Tenc(R)
