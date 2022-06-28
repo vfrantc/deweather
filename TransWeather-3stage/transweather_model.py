@@ -988,7 +988,7 @@ class Transweather_stages(nn.Module):
         clean = self.active(self.clean(x)) # activation on top of 0..1
 
         #return clean*I
-        return I
+        return I*R
 
     def load(self, path):
         """
