@@ -13,6 +13,7 @@ from decomp import get_decom
 #from dehaze import get_dehaze
 
 
+
 # From PyTorch internals
 def _ntuple(n):
     def parse(x):
@@ -975,6 +976,7 @@ class Transweather_stages(nn.Module):
         if path is not None:
             self.load(path)
 
+    '''
     def forward(self, x):
         print('Input: {} {}...{}'.format(x.size(), x.min().item(), x.max().item()))
         R, I = self.decomp(x)
@@ -996,6 +998,7 @@ class Transweather_stages(nn.Module):
         mult = R*I
         print('Reconstructed: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
 
+        # output[channel] = (input[channel] - mean[channel]) / std[channel]
 
         #R = 2*R - 1 # to put it into range -1..1
         #I = 2*I - 1 # to put it into range -1..1
@@ -1007,6 +1010,22 @@ class Transweather_stages(nn.Module):
         clean = self.active(self.clean(x)) # activation on top of 0..1
         #return clean*I
         return mult
+    '''
+
+    def forward(self, x):
+        R, I = self.decomp(x)
+
+        # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
+        I = F.normalize(I, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5), inplace=False)
+        I = self.dehaze(I)
+        R = R
+
+        #x1 = self.Tenc(R)
+        #x2 = self.Tdec(x1)
+        #x = self.convtail(x1, x2)
+        #clean = self.active(self.clean(x))
+
+        return R*I
 
     def load(self, path):
         """
