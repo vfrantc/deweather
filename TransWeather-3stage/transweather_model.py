@@ -8,9 +8,9 @@ from base_networks import *
 from torch.nn.init import _calculate_fan_in_and_fan_out
 from itertools import repeat
 import collections.abc
-
 from decomp import get_decom
 #from dehaze import get_dehaze
+from torchvision.transforms import Compose, ToTensor, Normalize
 
 
 
@@ -965,7 +965,7 @@ class Transweather_stages(nn.Module):
         self.decomp = get_decom(trainable=False)
         self.dehaze = get_dehaze(trainable=False)
 
-
+        self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 
         self.Tenc = Tenc()
         self.Tdec = Tdec()
@@ -1014,12 +1014,10 @@ class Transweather_stages(nn.Module):
 
     def forward(self, x):
         R, I = self.decomp(x)
-
         # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
-        I = F.normalize(I, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), False)
+        I = self.normalizer(I)
         I = self.dehaze(I)
         R = R
-
         #x1 = self.Tenc(R)
         #x2 = self.Tdec(x1)
         #x = self.convtail(x1, x2)
