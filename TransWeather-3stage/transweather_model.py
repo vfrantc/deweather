@@ -1016,7 +1016,7 @@ class Transweather_stages(nn.Module):
         R, I = self.decomp(x)
 
         # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
-        I = F.normalize(I, mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5), inplace=False)
+        I = F.normalize(I, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5), inplace=False)
         I = self.dehaze(I)
         R = R
 
