@@ -976,19 +976,25 @@ class Transweather_stages(nn.Module):
             self.load(path)
 
     def forward(self, x):
-        R, I = self.decomp(x) # Here R
+        print('Input: {} {}...{}'.format(x.size(), x.min().item(), x.max().item()))
+        R, I = self.decomp(x)
+        print('R: {} {} ... {}'.format(R.size(), R.min().item(), R.max().item()))
+        print('I: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
+        I = self.dehaze(I)
+        print('I dehazed: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
+
+        mult = R*I
+        print('Reconstructed: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
         #R = 2*R - 1 # to put it into range -1..1
         #I = 2*I - 1 # to put it into range -1..1
         #I = self.dehaze(I)
-
 
         x1 = self.Tenc(R)
         x2 = self.Tdec(x1)
         x = self.convtail(x1, x2)
         clean = self.active(self.clean(x)) # activation on top of 0..1
-
         #return clean*I
-        return I*R
+        return mult
 
     def load(self, path):
         """
