@@ -1016,13 +1016,16 @@ class Transweather_stages(nn.Module):
         R, I = self.decomp(x)
         # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
         I = self.normalizer(I)
+        print('After normalizer: {} .. {}', I.min(), I.max())
         I = self.dehaze(I)
         R = R
         #x1 = self.Tenc(R)
         #x2 = self.Tdec(x1)
         #x = self.convtail(x1, x2)
         #clean = self.active(self.clean(x))
-        return R*I
+        bla = R*I
+        print('{} ... {}'.format(bla.min(), bla.max()))
+        return bla
 
     def load(self, path):
         """
