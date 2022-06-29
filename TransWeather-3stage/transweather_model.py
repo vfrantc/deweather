@@ -1024,7 +1024,8 @@ class Transweather_stages(nn.Module):
         #x = self.convtail(x1, x2)
         #clean = self.active(self.clean(x))
         bla = R*I
-        print('{} ... {}'.format(bla.min(), bla.max()))
+        print('I: {} ... {}'.format(I.min(), I.max()))
+        print('result: {} ... {}'.format(bla.min(), bla.max()))
         return bla
 
     def load(self, path):
