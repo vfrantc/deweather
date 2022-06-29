@@ -1018,7 +1018,7 @@ class Transweather_stages(nn.Module):
         I = self.normalizer(I)
         print('After normalizer: {} .. {}', I.min(), I.max())
         I = torch.clip(self.dehaze(I) + 0.5, 0, 1)
-        R = R
+        R = R 
         #x1 = self.Tenc(R)
         #x2 = self.Tdec(x1)
         #x = self.convtail(x1, x2)
