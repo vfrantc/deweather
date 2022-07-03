@@ -1021,8 +1021,8 @@ class Transweather_stages(nn.Module):
         x1 = self.Tenc(R)
         x2 = self.Tdec(x1)
         x = self.convtail(x1, x2)
-        clean = self.active(self.clean(x))
-        bla = clean*I
+        #clean = self.active(self.clean(x))
+        bla = self.active(self.clean(x)*I)
         return bla
 
     def load(self, path):
