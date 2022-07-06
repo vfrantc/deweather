@@ -962,8 +962,8 @@ class Transweather_stages(nn.Module):
     def __init__(self, path=None, **kwargs):
         super(Transweather_stages, self).__init__()
 
-        self.decomp = get_decom(trainable=True)
-        self.dehaze = get_dehaze(trainable=True)
+        self.decomp = get_decom(trainable=False)
+        self.dehaze = get_dehaze(trainable=False)
 
         self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 
@@ -971,7 +971,7 @@ class Transweather_stages(nn.Module):
         self.Tdec = Tdec()
         self.convtail = convprojection()
         self.clean = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
-        self.active = nn.Tanh()
+        self.active = nn.Sigmoid()
 
         if path is not None:
             self.load(path)
