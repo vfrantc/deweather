@@ -940,8 +940,8 @@ class Transweather(nn.Module):
 
         x = self.convtail(x1, x2)
 
-        clean = self.active(self.clean(x))
-
+        #        clean = self.active(self.clean(x))
+        clean = self.clean(x)
         return clean
 
     def load(self, path):
