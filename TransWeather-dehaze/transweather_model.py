@@ -877,11 +877,8 @@ class Transweather_base(nn.Module):
         super(Transweather_base, self).__init__()
 
         self.Tenc = Tenc()
-
         self.convproj = convprojection_base()
-
         self.clean = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
-
         self.active = nn.Tanh()
 
         if path is not None:
@@ -889,7 +886,6 @@ class Transweather_base(nn.Module):
 
     def forward(self, x):
         x1 = self.Tenc(x)
-
         x = self.convproj(x1)
 
         clean = self.active(self.clean(x))
@@ -915,25 +911,18 @@ class Transweather(nn.Module):
 
     def __init__(self, path=None, **kwargs):
         super(Transweather, self).__init__()
-
         self.Tenc = Tenc()
-
         self.Tdec = Tdec()
-
         self.convtail = convprojection()
-
         self.clean = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
-
-        self.active = nn.Tanh()
+        self.active = nn.Sigmoid()
 
         if path is not None:
             self.load(path)
 
     def forward(self, x):
         x1 = self.Tenc(x)
-
         x2 = self.Tdec(x1)
-
         x = self.convtail(x1, x2)
 
         clean = self.active(self.clean(x))
