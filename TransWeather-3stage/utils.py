@@ -25,7 +25,7 @@ def calc_psnr(im1, im2):
     h, w = im2_y.shape
     im1_y = cv2.resize(im1_y, (w, h))
 
-    ans = [peak_signal_noise_ratio(im1_y, im2_y, data_range=255)]
+    ans = [peak_signal_noise_ratio(im1_y, im2_y)] # fix this, there is a problem here
     return ans
 
 
@@ -37,7 +37,7 @@ def calc_ssim(im1, im2):
     im2_y = cv2.cvtColor(im2, cv2.COLOR_BGR2YCR_CB)[:, :, 0]
     h, w = im2_y.shape
     im1_y = cv2.resize(im1_y, (w, h))
-    ans = [structural_similarity(im1_y, im2_y, data_range=255)]
+    ans = [structural_similarity(im1_y, im2_y)]
     return ans
 
 

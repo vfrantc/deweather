@@ -37,11 +37,11 @@ class ValData(data.Dataset):
         gt_img = gt_img.resize((wd_new, ht_new), Image.ANTIALIAS)
 
         # --- Transform to tensor --- #
-        transform_input = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        # for validation we normalize the input!!!!, I am not sure if it works the same on batch
+        transform_input = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]) # for validation we normalize the input!!!!, I am not sure if it works the same on batch
         transform_gt = Compose([ToTensor()])
         input_im = transform_input(input_img)
         gt = transform_gt(gt_img)
-
         return input_im, gt, input_name
 
     def __getitem__(self, index):

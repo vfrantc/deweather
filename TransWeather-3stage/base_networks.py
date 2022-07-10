@@ -14,15 +14,16 @@ from math import sqrt
 import random
 
 class ConvBlock(torch.nn.Module):
+    '''Implementation of convolutional operation with normalization and activation, normalize before the activation, but after the convolution!!!!'''
     def __init__(self, input_size, output_size, kernel_size=3, stride=1, padding=1, bias=True, activation='prelu', norm=None):
         super(ConvBlock, self).__init__()
-        self.conv = torch.nn.Conv2d(input_size, output_size, kernel_size, stride, padding, bias=bias)
-
-        self.norm = norm
+        self.conv = torch.nn.Conv2d(input_size, output_size, kernel_size, stride, padding, bias=bias) # the actual convolution
+        self.norm = norm # normalization
+        # it is known that it could be beneficial to use 'half-normalization'
         if self.norm =='batch':
-            self.bn = torch.nn.BatchNorm2d(output_size)
+            self.bn = torch.nn.BatchNorm2d(output_size) # batch
         elif self.norm == 'instance':
-            self.bn = torch.nn.InstanceNorm2d(output_size)
+            self.bn = torch.nn.InstanceNorm2d(output_size) # instance
 
         self.activation = activation
         if self.activation == 'relu':
@@ -33,23 +34,24 @@ class ConvBlock(torch.nn.Module):
             self.act = torch.nn.LeakyReLU(0.2, True)
         elif self.activation == 'tanh':
             self.act = torch.nn.Tanh()
-        elif self.activation == 'sigmoid':
+        elif self.activation == 'sigmoid': # for the last layer I will use sigmoid, but for some reason the use
             self.act = torch.nn.Sigmoid()
 
     def forward(self, x):
         if self.norm is not None:
-            out = self.bn(self.conv(x))
+            out = self.bn(self.conv(x)) # if norm then conv->norm
         else:
-            out = self.conv(x)
+            out = self.conv(x) #
 
         if self.activation != 'no':
-            return self.act(out)
+            return self.act(out) # activation, relu, sigmoid
         else:
             return out
 
 class DeconvBlock(torch.nn.Module):
     def __init__(self, input_size, output_size, kernel_size=4, stride=2, padding=1, bias=True, activation='prelu', norm=None):
         super(DeconvBlock, self).__init__()
+        # The same as for conv, but in other direction
         self.deconv = torch.nn.ConvTranspose2d(input_size, output_size, kernel_size, stride, padding, bias=bias)
 
         self.norm = norm
@@ -83,6 +85,10 @@ class DeconvBlock(torch.nn.Module):
 
 
 class ConvLayer(nn.Module):
+    '''
+    Convolution operation: the same, block and layer double each other
+    this one optionally has reflection padding
+    '''
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding):
         super(ConvLayer, self).__init__()
 #         reflection_padding = kernel_size // 2
@@ -106,40 +112,38 @@ class UpsampleConvLayer(torch.nn.Module):
 
 
 class ResidualBlock(torch.nn.Module):
+    '''Residual block has two convolutional layers '''
     def __init__(self, channels):
         super(ResidualBlock, self).__init__()
+        # conv1: channels -> channels, stride=1, so no change in stride
         self.conv1 = ConvLayer(channels, channels, kernel_size=3, stride=1, padding=1)
+        # conv2:
         self.conv2 = ConvLayer(channels, channels, kernel_size=3, stride=1, padding=1)
         self.relu = nn.ReLU()
 
     def forward(self, x):
         residual = x
-        out = self.relu(self.conv1(x))
+        out = self.relu(self.conv1(x)) # convolution, then activation, then add the residual!!!
         out = self.conv2(out) * 0.1
         out = torch.add(out, residual)
         return out
-    
-    
 
-    
-    
-def init_linear(linear):
-    init.xavier_normal(linear.weight)
-    linear.bias.data.zero_()
+def init_linear(linear): # linear initialization
+    init.xavier_normal(linear.weight) # normal xavier initialization, good for real-valued
+    linear.bias.data.zero_() #
 
 
 def init_conv(conv, glu=True):
-    init.kaiming_normal(conv.weight)
+    init.kaiming_normal(conv.weight) # kaiming normal
     if conv.bias is not None:
         conv.bias.data.zero_()
-
 
 class EqualLR:
     def __init__(self, name):
         self.name = name
 
     def compute_weight(self, module):
-        weight = getattr(module, self.name + '_orig')
+        weight = getattr(module, self.name + '_orig') #
         fan_in = weight.data.size(1) * weight.data[0][0].numel()
 
         return weight * sqrt(2 / fan_in)

@@ -22,8 +22,6 @@ def _ntuple(n):
         return tuple(repeat(x, n))
 
     return parse
-
-
 to_1tuple = _ntuple(1)
 to_2tuple = _ntuple(2)
 
@@ -873,48 +871,8 @@ class convprojection_base(nn.Module):
         return x
 
 
-## The following is the network which can be fine-tuned for specific datasets
-
-class Transweather_base(nn.Module):
-
-    def __init__(self, path=None, **kwargs):
-        super(Transweather_base, self).__init__()
-
-        self.Tenc = Tenc()
-
-        self.convproj = convprojection_base()
-
-        self.clean = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
-
-        self.active = nn.Tanh()
-
-        if path is not None:
-            self.load(path)
-
-    def forward(self, x):
-        x1 = self.Tenc(x)
-
-        x = self.convproj(x1)
-
-        clean = self.active(self.clean(x))
-
-        return clean
-
-    def load(self, path):
-        """
-        Load checkpoint.
-        """
-        checkpoint = torch.load(path, map_location=lambda storage, loc: storage)
-        model_state_dict_keys = self.state_dict().keys()
-        checkpoint_state_dict_noprefix = strip_prefix_if_present(checkpoint['state_dict'], "module.")
-        self.load_state_dict(checkpoint_state_dict_noprefix, strict=False)
-        del checkpoint
-        torch.cuda.empty_cache()
-
-
 ## The following is original network found in paper which solves all-weather removal problems
 ## using a single model
-
 class Transweather(nn.Module):
 
     def __init__(self, path=None, **kwargs):
@@ -941,8 +899,8 @@ class Transweather(nn.Module):
         x = self.convtail(x1, x2)
 
         #        clean = self.active(self.clean(x))
-        clean = self.clean(x)
-        return clean
+        #clean = self.clean(x) -> don't do the last layer
+        return x
 
     def load(self, path):
         """
@@ -1043,6 +1001,117 @@ def get_dehaze(trainable=False):
       param.requires_grad = False
     dehaze_net.load_state_dict(torch.load('./trained/best'), strict=False)
     return dehaze_net
+
+def conv(in_channels, out_channels, kernel_size, bias=False, stride = 1):
+    return nn.Conv2d(in_channels, out_channels, kernel_size, padding=(kernel_size//2), bias=bias, stride = stride)
+
+## Supervised Attention Module
+class SAM(nn.Module):
+    def __init__(self, n_feat, kernel_size=3, bias=True):
+        super(SAM, self).__init__()
+        self.conv1 = conv(n_feat, n_feat, kernel_size, bias=bias)
+        self.conv2 = conv(n_feat, 4, kernel_size, bias=bias)
+        self.conv3 = conv(4, n_feat, kernel_size, bias=bias)
+
+    def forward(self, x, x_img):
+        x1 = self.conv1(x)
+        img = self.conv2(x) + x_img
+        x2 = torch.sigmoid(self.conv3(img))
+        x1 = x1*x2
+        x1 = x1+x
+        return x1, img
+
+
+class Transweather_fusion(nn.Module):
+
+    def __init__(self, path=None, **kwargs):
+        super(Transweather_stages, self).__init__()
+
+        self.decomp = get_decom(trainable=True)
+        self.dehaze = get_dehaze(trainable=True)
+
+        self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+
+        self.Tenc = Tenc()
+        self.Tdec = Tdec()
+        self.convtail = convprojection()
+
+        # this part should be replaced, and also add the gamma-correction part
+        self.clean = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
+        self.active = nn.Sigmoid()
+
+
+        if path is not None:
+            self.load(path)
+
+    '''
+    def forward(self, x):
+        print('Input: {} {}...{}'.format(x.size(), x.min().item(), x.max().item()))
+        R, I = self.decomp(x)
+        print('R: {} {} ... {}'.format(R.size(), R.min().item(), R.max().item()))
+        print('I: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
+
+
+        Io = self.dehaze(I)
+        print('I dehazed no norm: {} {} ... {}'.format(Io.size(), Io.min().item(), Io.max().item()))
+
+        mult = R*Io
+        print('Reconstructed no norm: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
+
+        I = 2 * I - 1
+        print('I after norm: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
+        I = self.dehaze(I)
+        print('I dehazed after norm: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
+
+        mult = R*I
+        print('Reconstructed: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
+
+        # output[channel] = (input[channel] - mean[channel]) / std[channel]
+
+        #R = 2*R - 1 # to put it into range -1..1
+        #I = 2*I - 1 # to put it into range -1..1
+        #I = self.dehaze(I)
+
+        x1 = self.Tenc(R)
+        x2 = self.Tdec(x1)
+        x = self.convtail(x1, x2)
+        clean = self.active(self.clean(x)) # activation on top of 0..1
+        #return clean*I
+        return mult
+    '''
+
+    def forward(self, x):
+        R, I = self.decomp(x)
+        # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
+        I = self.normalizer(I)
+        I =self.dehaze(I)
+        R = self.normalizer(R)
+        x1 = self.Tenc(R)
+        x2 = self.Tdec(x1)
+        x = self.convtail(x1, x2)
+        #clean = self.active(self.clean(x))
+        bla = self.active(self.clean(x)*I)
+        return bla
+
+    def load(self, path):
+        """
+        Load checkpoint.
+        """
+        checkpoint = torch.load(path, map_location=lambda storage, loc: storage)
+        model_state_dict_keys = self.state_dict().keys()
+        checkpoint_state_dict_noprefix = strip_prefix_if_present(checkpoint['state_dict'], "module.")
+        self.load_state_dict(checkpoint_state_dict_noprefix, strict=False)
+        del checkpoint
+        torch.cuda.empty_cache()
+
+def get_dehaze(trainable=False):
+    dehaze_net = Transweather()
+    dehaze_net = dehaze_net.cuda()
+    for param in dehaze_net.parameters():
+      param.requires_grad = False
+    dehaze_net.load_state_dict(torch.load('./trained/best'), strict=False)
+    return dehaze_net
+
 
 if __name__ == "__main__":
     import torchsummary

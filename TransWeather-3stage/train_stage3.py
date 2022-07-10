@@ -13,21 +13,22 @@ from perceptual import LossNetwork
 import os
 import numpy as np
 import random
-from transweather_model import Transweather_stages as Transweather
+#from transweather_model import Transweather_stages as Transweather
+from transweather_model import Transweather_fusion as Transweather
 
 
 plt.switch_backend('agg')
 # --- Parse hyper-parameters  --- #
 parser = argparse.ArgumentParser(description='Hyper-parameters for network')
-parser.add_argument('-learning_rate', help='Set the learning rate', default=2e-4, type=float)
-parser.add_argument('-crop_size', help='Set the crop_size', default=[256, 256], nargs='+', type=int)
-parser.add_argument('-train_batch_size', help='Set the training batch size', default=18, type=int)
+parser.add_argument('-learning_rate', help='Set the learning rate', default=2e-4, type=float)           # start with 0.0002 as the learning rate
+parser.add_argument('-crop_size', help='Set the crop_size', default=[256, 256], nargs='+', type=int)    # crop_size -> don't change
+parser.add_argument('-train_batch_size', help='Set the training batch size', default=18, type=int)      # train_batch_size, 16..32
 parser.add_argument('-epoch_start', help='Starting epoch number of the training', default=0, type=int)
-parser.add_argument('-lambda_loss', help='Set the lambda in loss function', default=0.04, type=float)
-parser.add_argument('-val_batch_size', help='Set the validation/test batch size', default=1, type=int)
+parser.add_argument('-lambda_loss', help='Set the lambda in loss function', default=0.04, type=float)   # lambda -loss, 0.04 it is better
+parser.add_argument('-val_batch_size', help='Set the validation/test batch size', default=1, type=int)  # val_batch = 1 is logical
 parser.add_argument('-exp_name', help='directory for saving the networks of the experiment', type=str)
 parser.add_argument('-seed', help='set random seed', default=19, type=int)
-parser.add_argument('-num_epochs', help='number of epochs', default=200, type=int)
+parser.add_argument('-num_epochs', help='number of epochs', default=200, type=int)                      #
 
 args = parser.parse_args()
 
@@ -51,20 +52,18 @@ if seed is not None:
     print('Seed:\t{}'.format(seed))
 
 print('--- Hyper-parameters for training ---')
-print('learning_rate: {}\ncrop_size: {}\ntrain_batch_size: {}\nval_batch_size: {}\nlambda_loss: {}'.format(learning_rate, crop_size,
-      train_batch_size, val_batch_size, lambda_loss))
+print('learning_rate: {}\ncrop_size: {}\ntrain_batch_size: {}\nval_batch_size: {}\nlambda_loss: {}'.format(learning_rate, crop_size, train_batch_size, val_batch_size, lambda_loss))
 
 
-train_data_dir = './data/train/'
-val_data_dir = './data/test/'
+train_data_dir = './data/train/'    # train
+val_data_dir = './data/test/'       # validation
 
 # --- Gpu device --- #
-device_ids = [Id for Id in range(torch.cuda.device_count())]
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
+device_ids = [Id for Id in range(torch.cuda.device_count())] # find all the gpus
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # run on cuda if it is there
 
 # --- Define the network --- #
-net = Transweather()
+net = Transweather() # instantiate the network, it should initialize the weights randomly
 
 
 # --- Build optimizer --- #
@@ -72,18 +71,20 @@ optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
 
 
 # --- Multi-GPU --- #
-net = net.to(device)
-net = nn.DataParallel(net, device_ids=device_ids)
+net = net.to(device) # send the model to gpu
+net = nn.DataParallel(net, device_ids=device_ids) # make it parallel?
 
 
 # --- Define the perceptual loss network --- #
-vgg_model = vgg16(pretrained=True).features[:16]
-vgg_model = vgg_model.to(device)
+vgg_model = vgg16(pretrained=True).features[:16] # feature extractor vgg16
+vgg_model = vgg_model.to(device) # copy to gpu
 # vgg_model = nn.DataParallel(vgg_model, device_ids=device_ids)
 for param in vgg_model.parameters():
     param.requires_grad = False
 
 # --- Load the network weight --- #
+# if there is no folder -> create it
+# try to load the weights
 if os.path.exists('./{}/'.format(exp_name))==False:
     os.mkdir('./{}/'.format(exp_name))
 try:
@@ -95,23 +96,21 @@ except:
 
 # pytorch_total_params = sum(p.numel() for p in net.parameters() if p.requires_grad)
 # print("Total_params: {}".format(pytorch_total_params))
-loss_network = LossNetwork(vgg_model)
+loss_network = LossNetwork(vgg_model) # create the loss function
 loss_network.eval()
 
 # --- Load training data and validation/test data --- #
 
 ### The following file should be placed inside the directory "./data/train/"
-
 labeled_name = 'allweather.txt'
 
 ### The following files should be placed inside the directory "./data/test/"
-
-# val_filename = 'val_list_rain800.txt'
-val_filename1 = 'raindroptesta.txt'
+# val_filename = 'val_list_rain800.txt' # rain
+val_filename1 = 'raindroptesta.txt' # but we check everything on the
 # val_filename2 = 'test1.txt'
 
 # --- Load training data and validation/test data --- #
-lbl_train_data_loader = DataLoader(TrainData(crop_size, train_data_dir,labeled_name), batch_size=train_batch_size, shuffle=True, num_workers=8)
+lbl_train_data_loader = DataLoader(TrainData(crop_size, train_data_dir, labeled_name), batch_size=train_batch_size, shuffle=True, num_workers=8)
 
 ## Uncomment the other validation data loader to keep an eye on performance
 ## but note that validating while training significantly increases the train time
