@@ -1026,7 +1026,7 @@ class SAM(nn.Module):
 class Transweather_fusion(nn.Module):
 
     def __init__(self, path=None, **kwargs):
-        super(Transweather_stages, self).__init__()
+        super(Transweather_fusion, self).__init__()
 
         self.decomp = get_decom(trainable=True)
         self.dehaze = get_dehaze(trainable=True)
