@@ -1093,7 +1093,7 @@ class Transweather_fusion(nn.Module):
         x2 = self.Tdec(x1)
         x = self.convtail(x1, x2)
         #clean = self.active(self.clean(x))
-        bla = self.active(self.clean(x)*I)
+        bla = self.active(self.clean_dehaze(I)*self.clean_derain(x))
         return bla
 
     def load(self, path):
