@@ -1006,7 +1006,12 @@ class Transweather(nn.Module):
         self.Tenc = Tenc()
         self.Tdec = Tdec()
         self.convtail = convprojection()
-        self.clean = LastConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
+
+
+        self.clean_dehazer = LastConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
+        self.clean_derainer = L
+
+
         self.active = nn.Tanh()
 
         if path is not None:

@@ -980,7 +980,8 @@ class Transweather_stages(nn.Module):
         x2 = self.Tdec(x1)
         x = self.convtail(x1, x2)
         #clean = self.active(self.clean(x))
-        bla = self.active(self.clean(x)*I)
+
+        bla = self.active(self.clean_dehaze(I)*self.clean_derain(x))
         return bla
 
     def load(self, path):
@@ -1037,7 +1038,9 @@ class Transweather_fusion(nn.Module):
         self.convtail = convprojection()
 
         # this part should be replaced, and also add the gamma-correction part
-        self.clean = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
+        self.clean_dehaze = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
+        self.clean_derain = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
+
         self.active = nn.Sigmoid()
 
 
