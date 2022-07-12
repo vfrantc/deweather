@@ -8,7 +8,7 @@ from utils import validation, validation_val
 import os
 import numpy as np
 import random
-from transweather_model import Transweather_stages as Transweather
+from transweather_model import Transweather_fusion as Transweather
 
 # --- Parse hyper-parameters  --- #
 parser = argparse.ArgumentParser(description='Hyper-parameters for network')
