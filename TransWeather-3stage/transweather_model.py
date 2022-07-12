@@ -1028,8 +1028,8 @@ class Transweather_fusion(nn.Module):
     def __init__(self, path=None, **kwargs):
         super(Transweather_fusion, self).__init__()
 
-        self.decomp = get_decom(trainable=True)
-        self.dehaze = get_dehaze(trainable=True)
+        self.decomp = get_decom(trainable=False)
+        self.dehaze = get_dehaze(trainable=False)
 
         self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 
