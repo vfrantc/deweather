@@ -1023,6 +1023,46 @@ class SAM(nn.Module):
         return x1, img
 
 
+class GuidedFilter(nn.Module):
+    def __init__(self, r=15, eps=1e-3, gpu_ids=None):  # only work for gpu case at this moment
+        super(GuidedFilter, self).__init__()
+        self.r = r
+        self.eps = eps
+        # self.device = torch.device('cuda:{}'.format(self.gpu_ids[0])) if self.gpu_ids else torch.device('cpu')  # get device name: CPU or GPU
+
+        self.boxfilter = nn.AvgPool2d(kernel_size=2 * self.r + 1, stride=1, padding=self.r)
+
+    def forward(self, I, p):
+        """
+        I -- guidance image, should be [0, 1]
+        p -- filtering input image, should be [0, 1]
+        """
+
+        # N = self.boxfilter(self.tensor(p.size()).fill_(1))
+        N = self.boxfilter(torch.ones(p.size()))
+
+        if I.is_cuda:
+            N = N.cuda()
+
+        # print(N.shape)
+        # print(I.shape)
+        # print('-----------')
+
+        mean_I = self.boxfilter(I) / N
+        mean_p = self.boxfilter(p) / N
+        mean_Ip = self.boxfilter(I * p) / N
+        cov_Ip = mean_Ip - mean_I * mean_p
+
+        mean_II = self.boxfilter(I * I) / N
+        var_I = mean_II - mean_I * mean_I
+
+        a = cov_Ip / (var_I + self.eps)
+        b = mean_p - a * mean_I
+        mean_a = self.boxfilter(a) / N
+        mean_b = self.boxfilter(b) / N
+
+        return mean_a * I + mean_b
+
 class Transweather_fusion(nn.Module):
 
     def __init__(self, path=None, **kwargs):
@@ -1030,6 +1070,7 @@ class Transweather_fusion(nn.Module):
 
         self.decomp = get_decom(trainable=True)
         self.dehaze = get_dehaze(trainable=True)
+        self.gfilter = GuidedFilter()
 
         self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 
@@ -1047,51 +1088,20 @@ class Transweather_fusion(nn.Module):
         if path is not None:
             self.load(path)
 
-    '''
-    def forward(self, x):
-        print('Input: {} {}...{}'.format(x.size(), x.min().item(), x.max().item()))
-        R, I = self.decomp(x)
-        print('R: {} {} ... {}'.format(R.size(), R.min().item(), R.max().item()))
-        print('I: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
-
-
-        Io = self.dehaze(I)
-        print('I dehazed no norm: {} {} ... {}'.format(Io.size(), Io.min().item(), Io.max().item()))
-
-        mult = R*Io
-        print('Reconstructed no norm: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
-
-        I = 2 * I - 1
-        print('I after norm: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
-        I = self.dehaze(I)
-        print('I dehazed after norm: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
-
-        mult = R*I
-        print('Reconstructed: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
-
-        # output[channel] = (input[channel] - mean[channel]) / std[channel]
-
-        #R = 2*R - 1 # to put it into range -1..1
-        #I = 2*I - 1 # to put it into range -1..1
-        #I = self.dehaze(I)
-
-        x1 = self.Tenc(R)
-        x2 = self.Tdec(x1)
-        x = self.convtail(x1, x2)
-        clean = self.active(self.clean(x)) # activation on top of 0..1
-        #return clean*I
-        return mult
-    '''
-
     def forward(self, x):
         R, I = self.decomp(x)
         # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
         I = self.normalizer(I)
         I =self.dehaze(I)
-        R = self.normalizer(R)
+        guidance = 0.2989 * x[:, 0, :, :] + 0.5870 * x[:, 1, :, :] + 0.1140 * x[:, 2, :, :]
+        guidance = (guidance + 1) / 2
+        guidance = torch.unsqueeze(guidance, dim=1)
+        R = self.guided_filter(guidance, R)
+        #R = self.normalizer(R)
         x1 = self.Tenc(R)
         x2 = self.Tdec(x1)
         x = self.convtail(x1, x2)
+
         #clean = self.active(self.clean(x))
         bla = self.active(self.clean_dehaze(I)*self.clean_derain(x))
         return bla
