@@ -1070,7 +1070,7 @@ class Transweather_fusion(nn.Module):
 
         self.decomp = get_decom(trainable=True)
         self.dehaze = get_dehaze(trainable=True)
-        self.gfilter = GuidedFilter()
+        self.guided_filter = GuidedFilter()
 
         self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 
