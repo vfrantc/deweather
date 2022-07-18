@@ -913,96 +913,6 @@ class Transweather(nn.Module):
         del checkpoint
         torch.cuda.empty_cache()
 
-
-
-class Transweather_stages(nn.Module):
-
-    def __init__(self, path=None, **kwargs):
-        super(Transweather_stages, self).__init__()
-
-        self.decomp = get_decom(trainable=True)
-        self.dehaze = get_dehaze(trainable=True)
-
-        self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-
-        self.Tenc = Tenc()
-        self.Tdec = Tdec()
-        self.convtail = convprojection()
-        self.clean = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
-        self.active = nn.Sigmoid()
-
-        if path is not None:
-            self.load(path)
-
-    '''
-    def forward(self, x):
-        print('Input: {} {}...{}'.format(x.size(), x.min().item(), x.max().item()))
-        R, I = self.decomp(x)
-        print('R: {} {} ... {}'.format(R.size(), R.min().item(), R.max().item()))
-        print('I: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
-
-
-        Io = self.dehaze(I)
-        print('I dehazed no norm: {} {} ... {}'.format(Io.size(), Io.min().item(), Io.max().item()))
-
-        mult = R*Io
-        print('Reconstructed no norm: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
-
-        I = 2 * I - 1
-        print('I after norm: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
-        I = self.dehaze(I)
-        print('I dehazed after norm: {} {} ... {}'.format(I.size(), I.min().item(), I.max().item()))
-
-        mult = R*I
-        print('Reconstructed: {} {} ... {}'.format(mult.size(), mult.min().item(), mult.max().item()))
-
-        # output[channel] = (input[channel] - mean[channel]) / std[channel]
-
-        #R = 2*R - 1 # to put it into range -1..1
-        #I = 2*I - 1 # to put it into range -1..1
-        #I = self.dehaze(I)
-
-        x1 = self.Tenc(R)
-        x2 = self.Tdec(x1)
-        x = self.convtail(x1, x2)
-        clean = self.active(self.clean(x)) # activation on top of 0..1
-        #return clean*I
-        return mult
-    '''
-
-    def forward(self, x):
-        R, I = self.decomp(x)
-        # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
-        I = self.normalizer(I)
-        I =self.dehaze(I)
-        R = self.normalizer(R)
-        x1 = self.Tenc(R)
-        x2 = self.Tdec(x1)
-        x = self.convtail(x1, x2)
-        #clean = self.active(self.clean(x))
-
-        bla = self.active(self.clean_dehaze(I)*self.clean_derain(x))
-        return bla
-
-    def load(self, path):
-        """
-        Load checkpoint.
-        """
-        checkpoint = torch.load(path, map_location=lambda storage, loc: storage)
-        model_state_dict_keys = self.state_dict().keys()
-        checkpoint_state_dict_noprefix = strip_prefix_if_present(checkpoint['state_dict'], "module.")
-        self.load_state_dict(checkpoint_state_dict_noprefix, strict=False)
-        del checkpoint
-        torch.cuda.empty_cache()
-
-def get_dehaze(trainable=False):
-    dehaze_net = Transweather()
-    dehaze_net = dehaze_net.cuda()
-    for param in dehaze_net.parameters():
-      param.requires_grad = False
-    dehaze_net.load_state_dict(torch.load('./trained/best'), strict=False)
-    return dehaze_net
-
 def conv(in_channels, out_channels, kernel_size, bias=False, stride = 1):
     return nn.Conv2d(in_channels, out_channels, kernel_size, padding=(kernel_size//2), bias=bias, stride = stride)
 
@@ -1022,88 +932,42 @@ class SAM(nn.Module):
         x1 = x1+x
         return x1, img
 
-
-class GuidedFilter(nn.Module):
-    def __init__(self, r=15, eps=1e-3, gpu_ids=None):  # only work for gpu case at this moment
-        super(GuidedFilter, self).__init__()
-        self.r = r
-        self.eps = eps
-        # self.device = torch.device('cuda:{}'.format(self.gpu_ids[0])) if self.gpu_ids else torch.device('cpu')  # get device name: CPU or GPU
-
-        self.boxfilter = nn.AvgPool2d(kernel_size=2 * self.r + 1, stride=1, padding=self.r)
-
-    def forward(self, I, p):
-        """
-        I -- guidance image, should be [0, 1]
-        p -- filtering input image, should be [0, 1]
-        """
-
-        # N = self.boxfilter(self.tensor(p.size()).fill_(1))
-        N = self.boxfilter(torch.ones(p.size()))
-
-        if I.is_cuda:
-            N = N.cuda()
-
-        # print(N.shape)
-        # print(I.shape)
-        # print('-----------')
-
-        mean_I = self.boxfilter(I) / N
-        mean_p = self.boxfilter(p) / N
-        mean_Ip = self.boxfilter(I * p) / N
-        cov_Ip = mean_Ip - mean_I * mean_p
-
-        mean_II = self.boxfilter(I * I) / N
-        var_I = mean_II - mean_I * mean_I
-
-        a = cov_Ip / (var_I + self.eps)
-        b = mean_p - a * mean_I
-        mean_a = self.boxfilter(a) / N
-        mean_b = self.boxfilter(b) / N
-
-        return mean_a * I + mean_b
-
 class Transweather_fusion(nn.Module):
 
     def __init__(self, path=None, **kwargs):
         super(Transweather_fusion, self).__init__()
 
-        self.decomp = get_decom(trainable=True)
-        self.dehaze = get_dehaze(trainable=True)
-        self.guided_filter = GuidedFilter()
+        self.decomp = get_decom(trainable=False)
+        self.dehaze = get_dehaze(trainable=False)
+        self.despekle = get_despekle(trainable=False)
 
         self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 
-        self.Tenc = Tenc()
-        self.Tdec = Tdec()
-        self.convtail = convprojection()
-
-        # this part should be replaced, and also add the gamma-correction part
+        self.dehaze_sam = SAM(n_feat=8, kernel_size=3, bias=True)
         self.clean_dehaze = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
+
+        self.clean_sam = SAM(n_feat=8, kernel_size=3, bias=True)
         self.clean_derain = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
 
         self.active = nn.Sigmoid()
-
 
         if path is not None:
             self.load(path)
 
     def forward(self, x):
         R, I = self.decomp(x)
+
         # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
         I = self.normalizer(I)
         I =self.dehaze(I)
-        guidance = 0.2989 * x[:, 0, :, :] + 0.5870 * x[:, 1, :, :] + 0.1140 * x[:, 2, :, :]
-        guidance = (guidance + 1) / 2
-        guidance = torch.unsqueeze(guidance, dim=1)
-        R = self.guided_filter(guidance, R)
-        #R = self.normalizer(R)
-        x1 = self.Tenc(R)
-        x2 = self.Tdec(x1)
-        x = self.convtail(x1, x2)
 
-        #clean = self.active(self.clean(x))
-        bla = self.active(self.clean_dehaze(I)*self.clean_derain(x))
+        R = self.normalizer(R)
+        R = self.despekle(R)
+
+        I_att = self.dehaze_sam(I, x)
+        R_att = self.despekle_sam(R, x)
+
+        bla = self.active(self.clean_dehaze(I_att)*self.clean_derain(R_att))
         return bla
 
     def load(self, path):
@@ -1121,9 +985,18 @@ def get_dehaze(trainable=False):
     dehaze_net = Transweather()
     dehaze_net = dehaze_net.cuda()
     for param in dehaze_net.parameters():
-      param.requires_grad = False
+      param.requires_grad = trainable
     dehaze_net.load_state_dict(torch.load('./trained/best'), strict=False)
     return dehaze_net
+
+def get_despekle(trainable=False):
+    dehaze_net = Transweather()
+    dehaze_net = dehaze_net.cuda()
+    for param in dehaze_net.parameters():
+      param.requires_grad = trainable
+    dehaze_net.load_state_dict(torch.load('./trained_spec/best'), strict=False)
+    return dehaze_net
+et
 
 
 if __name__ == "__main__":
