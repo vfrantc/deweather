@@ -964,10 +964,10 @@ class Transweather_fusion(nn.Module):
         R = self.normalizer(R)
         R = self.despekle(R)
 
-        I_att = self.dehaze_sam(I, x)
-        R_att = self.despekle_sam(R, x)
+        #I_att = self.dehaze_sam(I, x)
+        #R_att = self.despekle_sam(R, x)
 
-        bla = self.active(self.clean_dehaze(I_att)*self.clean_derain(R_att))
+        bla = self.active(self.clean_dehaze(I)*self.clean_derain(R))
         return bla
 
     def load(self, path):
