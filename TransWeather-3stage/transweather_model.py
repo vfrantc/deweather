@@ -937,16 +937,16 @@ class Transweather_fusion(nn.Module):
     def __init__(self, path=None, **kwargs):
         super(Transweather_fusion, self).__init__()
 
-        self.decomp = get_decom(trainable=False)
-        self.dehaze = get_dehaze(trainable=False)
-        self.despekle = get_despekle(trainable=False)
+        self.decomp = get_decom(trainable=True)
+        self.dehaze = get_dehaze(trainable=True)
+        self.despekle = get_despekle(trainable=True)
 
         self.normalizer = Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
 
-        self.dehaze_sam = SAM(n_feat=8, kernel_size=3, bias=True)
+        #self.dehaze_sam = SAM(n_feat=8, kernel_size=3, bias=True)
         self.clean_dehaze = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
 
-        self.despekle_sam = SAM(n_feat=8, kernel_size=3, bias=True)
+        #self.despekle_sam = SAM(n_feat=8, kernel_size=3, bias=True)
         self.clean_derain = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
 
         self.active = nn.Sigmoid()
