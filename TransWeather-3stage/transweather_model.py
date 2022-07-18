@@ -996,8 +996,6 @@ def get_despekle(trainable=False):
       param.requires_grad = trainable
     dehaze_net.load_state_dict(torch.load('./trained_spec/best'), strict=False)
     return dehaze_net
-et
-
 
 if __name__ == "__main__":
     import torchsummary
