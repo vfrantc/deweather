@@ -921,8 +921,8 @@ class SAM(nn.Module):
     def __init__(self, n_feat, kernel_size=3, bias=True):
         super(SAM, self).__init__()
         self.conv1 = conv(n_feat, n_feat, kernel_size, bias=bias)
-        self.conv2 = conv(n_feat, 4, kernel_size, bias=bias)
-        self.conv3 = conv(4, n_feat, kernel_size, bias=bias)
+        self.conv2 = conv(n_feat, 3, kernel_size, bias=bias)
+        self.conv3 = conv(3, n_feat, kernel_size, bias=bias)
 
     def forward(self, x, x_img):
         x1 = self.conv1(x)
