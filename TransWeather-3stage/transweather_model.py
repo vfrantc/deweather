@@ -946,7 +946,7 @@ class Transweather_fusion(nn.Module):
         self.dehaze_sam = SAM(n_feat=8, kernel_size=3, bias=True)
         self.clean_dehaze = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
 
-        self.clean_sam = SAM(n_feat=8, kernel_size=3, bias=True)
+        self.despekle_sam = SAM(n_feat=8, kernel_size=3, bias=True)
         self.clean_derain = ConvLayer(8, 3, kernel_size=3, stride=1, padding=1)
 
         self.active = nn.Sigmoid()
