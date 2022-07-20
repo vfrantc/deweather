@@ -20,8 +20,8 @@ class ValData(data.Dataset):
     def get_images(self, index):
         input_name = self.input_names[index]
         gt_name = self.gt_names[index]
-        input_img = Image.open(self.val_data_dir + input_name)
-        gt_img = Image.open(self.val_data_dir + gt_name)
+        input_img = Image.open(self.val_data_dir + input_name).convert('RGB')
+        gt_img = Image.open(self.val_data_dir + gt_name).convert('RGB')
 
         # Resizing image in the multiple of 16"
         wd_new,ht_new = input_img.size
@@ -37,8 +37,7 @@ class ValData(data.Dataset):
         gt_img = gt_img.resize((wd_new, ht_new), Image.ANTIALIAS)
 
         # --- Transform to tensor --- #
-        # for validation we normalize the input!!!!, I am not sure if it works the same on batch
-        transform_input = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]) # for validation we normalize the input!!!!, I am not sure if it works the same on batch
+        transform_input = Compose([ToTensor(), Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         transform_gt = Compose([ToTensor()])
         input_im = transform_input(input_img)
         gt = transform_gt(gt_img)
