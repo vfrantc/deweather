@@ -123,6 +123,7 @@ class DecomNet(nn.Module):
         outs     = self.net1_recon(featss)
         R        = torch.sigmoid(outs[:, 0:3, :, :]) # reflectance
         L        = torch.sigmoid(outs[:, 3:4, :, :]) # light
+        L = torch.cat((L, L, L), dim=1)
         return R, L
 
 def get_decom(trainable=True):
