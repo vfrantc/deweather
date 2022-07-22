@@ -937,7 +937,7 @@ class Transweather_fusion(nn.Module):
     def __init__(self, path=None, **kwargs):
         super(Transweather_fusion, self).__init__()
 
-        self.decomp = get_decom(trainable=True)
+        self.decomp = get_decom(trainable=False)
         self.dehaze = get_dehaze(trainable=True)
         self.despekle = get_despekle(trainable=True)
 
@@ -994,7 +994,7 @@ def get_despekle(trainable=False):
     dehaze_net = dehaze_net.cuda()
     for param in dehaze_net.parameters():
       param.requires_grad = trainable
-    dehaze_net.load_state_dict(torch.load('./trained_spec/best'), strict=False)
+    #dehaze_net.load_state_dict(torch.load('./trained_spec/best'), strict=False)
     return dehaze_net
 
 if __name__ == "__main__":
