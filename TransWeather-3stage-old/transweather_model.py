@@ -994,7 +994,7 @@ def get_despekle(trainable=False):
     dehaze_net = dehaze_net.cuda()
     for param in dehaze_net.parameters():
       param.requires_grad = trainable
-    dehaze_net.load_state_dict(torch.load('./trained_spec/best'), strict=False)
+   # dehaze_net.load_state_dict(torch.load('./trained_spec/best'), strict=False)
     return dehaze_net
 
 if __name__ == "__main__":
