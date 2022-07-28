@@ -7,13 +7,13 @@ colors = ((0, 255, 0), (0, 0, 255))
 image_width, image_height = 768, 512
 part_size = image_height // 2
 
-
 def get_key(filename):
     if '_' in filename:
         new_key = filename.split("_")[0]
     else:
         new_key = filename.split(".")[0]
     return new_key
+
 
 def process_dataset(marks_file, dataset_path, output_path):
     with open(marks_file) as f:
@@ -68,6 +68,9 @@ if __name__ == '__main__':
         data = json.load(f)
 
     for name, dataset in data.items():
+        #print('Dataset: {}'.format(key))
+        #path = "/Users/franz/devel/deweather/data/test/{}/input".format(key)
+
         print("Processing {}".format(name))
         print("{} : {} ".format(dataset['marks_file'], dataset['processed_path']))
         process_dataset(dataset['marks_file'], dataset_path=dataset['processed_path'].replace('ppt/', ''), output_path=os.path.join('out2', name))

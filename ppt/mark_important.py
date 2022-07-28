@@ -2,7 +2,6 @@ import os
 import cv2
 import json
 
-
 class App(object):
 
     def __init__(self, folder, images, saveto):
@@ -82,11 +81,13 @@ class App(object):
 
         cv2.destroyAllWindows()
 
+
 if __name__ == '__main__':
     with open('images.json', 'r') as infile:
         data = json.load(infile)
 
     for key, dataset in data.items():
         print('Dataset: {}'.format(key))
-        app = App(dataset['path'], dataset['images'], saveto=dataset['marks_file'])
+        path = "/Users/franz/devel/deweather/data/test/{}/input".format(key)
+        app = App(path, dataset['images'], saveto="{}.json".format(key))
         app.run()

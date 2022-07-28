@@ -1,43 +1,31 @@
-{"real-world-images": {
-    "path": "/home/franz/derain/data/real-world-images/input",
-    "images": ["573.png","576.png", "581.png", "584.png", "586.png", "589.png", "590.png", "591.png", "596.png", "617.png", "644.png", "013.png" ,"073.png", "076.png", "080.png", "087.png", "093.png", "095.png", "120.png", "121.png", "124.png", "125.png", "126.png",  "131.png", "142.png", "144.png", "155.png", "156.png", "166.png", "002.png", "004.png", "017.png", "043.png", "045.png", "046.png", "048.png", "052.png"],
-    "marks_file": "real-world-images_marks.json",
-    "processed_path": "/home/franz/derain/ppt/out/real-world-images/",
-    "methods": ["input", "gcn", "mprnet", "vrg", "irr", "hinet", "hinet520", "qhinet520", "qhinet720", "color_corrected", "decolor_corrected"]
-  },
-  "Rain100H": {
-    "path": "/home/franz/derain/data/Rain100H/input/",
-    "images": ["1.png", "2.png", "3.png", "4.png", "5.png", "7.png", "8.png"],
-    "marks_file": "Rain100H_marks.json",
-    "processed_path": "/home/franz/derain/ppt/out/Rain100H/",
-    "methods": ["input", "gt", "gcn", "mprnet", "mspfn", "vrg", "irr", "hinet", "hinet520", "qhinet520", "qhinet720", "color_corrected", "decolor_corrected"]
-  },
-  "Rain100L": {
-    "path": "/home/franz/derain/data/Rain100L/input/",
-    "images": ["1.png", "2.png", "3.png", "4.png", "5.png", "7.png", "8.png"],
-    "marks_file": "Rain100L_marks.json",
-    "processed_path": "/home/franz/derain/ppt/out/Rain100L/",
-    "methods": ["input", "gt", "gcn", "mprnet", "mspfn", "vrg", "irr", "hinet", "hinet520", "qhinet520", "qhinet720", "color_corrected", "decolor_corrected", "60_gray", "60_no_gray"]
-  },
-  "Test100": {
-    "path": "/home/franz/derain/data/Test100/input/",
-    "images": ["5.png", "11.png", "18.png", "25.png", "28.png", "32.png"],
-    "marks_file": "Test100_marks.json",
-    "processed_path": "/home/franz/derain/ppt/out/Test100/",
-    "methods": ["input", "gt", "gcn", "mprnet", "mspfn", "vrg", "irr", "hinet", "hinet520", "qhinet520", "qhinet720", "color_corrected", "decolor_corrected"]
-  },
-  "Test1200": {
-    "path": "/home/franz/derain/data/Test1200/input/",
-    "images": ["1.png", "2.png", "3.png", "4.png", "5.png", "6.png"],
-    "marks_file": "Test1200_marks.json",
-    "processed_path": "/home/franz/derain/ppt/out/Test1200/",
-    "methods": ["input", "gt", "gcn", "mprnet", "mspfn", "vrg", "irr", "hinet", "hinet520", "qhinet520", "qhinet720", "color_corrected", "decolor_corrected"]
-  },
-  "Test2800": {
-    "path": "/home/franz/derain/data/Test2800/input/",
-    "images": ["804_1.png", "806_1.png", "808_3.png", "810_4.png", "814_4.png", "821_3.png"],
-    "marks_file": "Test2800_marks.json",
-    "processed_path": "/home/franz/derain/ppt/out/Test2800/",
-    "methods": ["input", "gt", "gcn", "mprnet", "vrg", "irr", "hinet", "hinet520", "qhinet520", "qhinet720", "color_corrected", "decolor_corrected"]
-  }
+{ "fog": {
+    "images": ["foggy-001.jpg", "foggy-002.jpg", "foggy-003.jpg", "foggy-004.jpg", "foggy-006.jpg"],
+    "methods": ["test/input"]},
+  "outdoor": {
+    "images": ["0001_0.8_0.2.jpg", "0002_0.8_0.08.jpg", "0003_0.8_0.2.jpg", "0004_0.9_0.12.jpg", "0006_0.85_0.08.jpg"],
+    "methods": ["test/input"]},
+  "rain": {
+    "images": ["rain_storm-001.jpg", "rain_storm-002.jpg", "rain_storm-003.jpg", "rain_storm-004.jpg", "rain_storm-005.jpg"],
+    "methods": ["test/input"]},
+  "rain1400": {
+    "images": ["901_1.jpg", "901_2.jpg", "901_3.jpg", "901_4.jpg", "901_5.jpg"],
+    "methods": ["test/input"]},
+  "rain_drop_test": {
+    "images": ["0_rain.png", "1_rain.png", "2_rain.png", "3_rain.png", "4_rain.png"],
+    "methods": ["test/input"]},
+  "real": {
+    "images": ["001.png", "002.png", "003.png", "004.png", "005.png"],
+    "methods": ["test/input"]},
+  "sand": {
+    "images": ["dusttornado-001.jpg", "dusttornado-002.jpg", "dusttornado-003.jpg", "dusttornado-004.jpg", "dusttornado-005.jpg"],
+    "methods": ["test/input"]},
+  "snow": {
+    "images": ["snow_storm-001.jpg", "snow_storm-002.jpg", "snow_storm-003.jpg", "snow_storm-004.jpg", "snow_storm-005.jpg"],
+    "methods": ["test/input"]},
+  "Snow100K-L": {
+    "images": ["beautiful_smile_00003.jpg", "beautiful_smile_00007.jpg", "beautiful_smile_00010.jpg", "beautiful_smile_00016.jpg", "beautiful_smile_00020.jpg"],
+    "methods": ["test/input"]},
+  "test1": {
+    "images": ["im_0301_s80_a04.png", "im_0303_s95_a05.png", "im_0304_s95_a06.png", "im_0306_s95_a04.png", "im_0310_s90_a06.png"],
+    "methods": ["test/input"]}
 }
