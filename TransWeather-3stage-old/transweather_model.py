@@ -956,10 +956,12 @@ class Transweather_fusion(nn.Module):
 
     def forward(self, x):
         R, I = self.decomp(x)
+        R = R[:, 1:, :, :]
+        I = I[:, 1:, :, :]
 
         # normalize R and I and mean (0.5, 0.5, 0.5) and std (0.5, 0.5, 0.5)
         I = self.normalizer(I)
-        I =self.dehaze(I)
+        I = self.dehaze(I)
 
         R = self.normalizer(R)
         R = self.despekle(R)

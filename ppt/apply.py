@@ -2,10 +2,11 @@ import os
 import cv2
 import json
 import numpy as np
+from pprint import pprint
 
-colors = ((0, 255, 0), (0, 0, 255))
-image_width, image_height = 768, 512
-part_size = image_height // 2
+colors = ((0, 255, 0), (0, 0, 255))     # colors that we use to mark the detections
+image_width, image_height = 768, 512    # the size of the image
+part_size = image_height // 2           # the size of the zoomed thing
 
 def get_key(filename):
     if '_' in filename:
@@ -14,32 +15,32 @@ def get_key(filename):
         new_key = filename.split(".")[0]
     return new_key
 
-
-def process_dataset(marks_file, dataset_path, output_path):
-    with open(marks_file) as f:
-        data = json.load(f)
-
+'''
     new_data = dict()
     for key, item in data.items():
         new_key = get_key(key)
         new_data[new_key] = data[key]
+'''
 
-    main_folder = dataset_path
-    out_folder = output_path
-    os.mkdir(out_folder)
-    for folder in os.listdir(main_folder):
+def process_dataset(name, marks_file, methods, output_path):
+    '''
+    name=name,
+    marks_file="{}.json".format(name),
+    methods=dataset['methods'],
+    output_path=os.path.join('out2', name)
+
+    Returns:
+    '''
+    # so we provide the thing with marks_file contains bounding boxes for all the detections
+    with open(marks_file) as f: # it's fine
+        data = json.load(f)
+
+    os.mkdir(output_path)
+    for method in methods:
         os.mkdir(os.path.join(out_folder, folder))
-        for file in os.listdir(os.path.join(main_folder, folder)):
-            in_file = os.path.join(main_folder, folder, file)
-            out_file = os.path.join(out_folder, folder, file)
-
-            print(in_file)
+        for imname, rects in data.items():
             image = cv2.imread(in_file, 1)
             image = cv2.resize(image, (image_width, image_height))
-            key = get_key(os.path.basename(in_file))
-            if not key in new_data:
-                continue
-            rects = new_data[key]
 
             parts = []
             for color, (x, y, h, w) in zip(colors, rects):
@@ -56,6 +57,7 @@ def process_dataset(marks_file, dataset_path, output_path):
             image = cv2.rectangle(image, (image_width, image_height - part_size + 2,),
                                   (image_width + part_size - 3, image_height - 2,), color=colors[1], thickness=3)
             print("{}\t\t\t|\t *** {} ***".format(folder.upper(), os.path.basename(in_file)))
+
             cv2.imwrite(out_file, image)
 
 
@@ -70,7 +72,11 @@ if __name__ == '__main__':
     for name, dataset in data.items():
         #print('Dataset: {}'.format(key))
         #path = "/Users/franz/devel/deweather/data/test/{}/input".format(key)
+        print(dataset)
 
         print("Processing {}".format(name))
         print("{} : {} ".format(dataset['marks_file'], dataset['processed_path']))
-        process_dataset(dataset['marks_file'], dataset_path=dataset['processed_path'].replace('ppt/', ''), output_path=os.path.join('out2', name))
+        process_dataset(name=name,
+                        marks_file="{}.json".format(name),
+                        methods=dataset['methods'],
+                        output_path=os.path.join('out2', name))
