@@ -87,6 +87,8 @@ if __name__ == '__main__':
         data = json.load(infile)
 
     for key, dataset in data.items():
+        if key != 'snow':
+            continue
         print('Dataset: {}'.format(key))
         path = "/Users/franz/devel/deweather/data/test/{}/input".format(key)
         app = App(path, dataset['images'], saveto="{}.json".format(key))

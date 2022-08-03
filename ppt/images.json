@@ -1,31 +1,31 @@
 { "fog": {
-    "images": ["foggy-001.jpg", "foggy-002.jpg", "foggy-003.jpg", "foggy-004.jpg", "foggy-006.jpg"],
-    "methods": ["test/input"]},
+    "images": ["foggy-001.jpg", "foggy-002.jpg", "foggy-003.jpg", "foggy-004.jpg", "foggy-006.jpg", "foggy-010.jpg", "foggy-011.jpg", "foggy-012.jpg", "foggy-014.jpg", "foggy-016.jpg"],
+    "methods": ["test/fog/input", "epdn/fog", "ffa/fog", "gca_dehaze/fog", "mmaxim/fog", "refinednet/fog", "transweather/fog", "tskf/fog", "my1/fog", "my2/fog"]},
   "outdoor": {
     "images": ["0001_0.8_0.2.jpg", "0002_0.8_0.08.jpg", "0003_0.8_0.2.jpg", "0004_0.9_0.12.jpg", "0006_0.85_0.08.jpg"],
-    "methods": ["test/input"]},
+    "methods": ["test/outdoor/input", "epdn/outdoor", "ffa/outdoor", "gca_dehaze/outdoor", "mmaxim/outdoor", "refinednet/outdoor", "transweather/outdoor", "tskf/outdoor", "my1/outdoor", "my2/outdoor"]},
   "rain": {
-    "images": ["rain_storm-001.jpg", "rain_storm-002.jpg", "rain_storm-003.jpg", "rain_storm-004.jpg", "rain_storm-005.jpg"],
-    "methods": ["test/input"]},
+    "images": ["rain_storm-001.jpg", "rain_storm-002.jpg", "rain_storm-003.jpg", "rain_storm-004.jpg", "rain_storm-005.jpg", "rain_storm-006.jpg", "rain_storm-007.jpg", "rain_storm-008.jpg", "rain_storm-009.jpg", "rain_storm-010.jpg", "rain_storm-126.jpg", "rain_storm-130.jpg", "rain_storm-134.jpg", "rain_storm-138.jpg", "rain_storm-146.jpg", "rain_storm-168.jpg", "rain_storm-176.jpg", "rain_storm-195.jpg", "rain_storm-199.jpg", "rain_storm-207.jpg", "rain_storm-213.jpg", "rain_storm-229.jpg", "rain_storm-253.jpg", "rain_storm-257.jpg", "rain_storm-265.jpg", "rain_storm-283.jpg"],
+    "methods": ["test/rain/input", "ffa/rain", "gca_dehaze/rain", "gca_derain/rain", "mprnet/rain", "transweather/rain", "tskf/rain", "my1/rain", "my2/rain", "mmaxim/rain"]},
   "rain1400": {
-    "images": ["901_1.jpg", "901_2.jpg", "901_3.jpg", "901_4.jpg", "901_5.jpg"],
-    "methods": ["test/input"]},
+    "images": ["901_1.jpg", "902_2.jpg", "903_3.jpg", "904_4.jpg", "905_5.jpg"],
+    "methods": ["test/rain1400/input", "gca_derain/rain1400", "mmaxim/rain1400", "mprnet/rain1400", "transweather/rain1400", "tskf/rain1400", "my1/rain1400", "my2/rain1400"]},
   "rain_drop_test": {
     "images": ["0_rain.png", "1_rain.png", "2_rain.png", "3_rain.png", "4_rain.png"],
-    "methods": ["test/input"]},
+    "methods": ["test/rain_drop_test/input", "mmaxim/rain_drop_test", "transweather/rain_drop_test"]},
   "real": {
-    "images": ["001.png", "002.png", "003.png", "004.png", "005.png"],
-    "methods": ["test/input"]},
+    "images": ["001.png", "002.png", "003.png", "004.png", "005.png", "006.png", "007.png", "008.png", "009.png", "010.png", "573.png","576.png", "581.png", "584.png", "586.png", "589.png", "590.png", "591.png", "596.png", "617.png", "644.png", "013.png" ,"073.png", "076.png", "080.png", "087.png", "093.png", "095.png", "107.png", "120.png", "121.png", "124.png", "125.png", "126.png",  "131.png", "142.png", "144.png", "155.png", "156.png", "166.png", "017.png", "043.png", "045.png", "046.png", "048.png", "052.png", "563.png", "567.png", "590.png", "614.png", "617.png"],
+    "methods": ["test/real/input", "epdn/real", "ffa/real", "gca_dehaze/real", "gca_derain/real", "mmaxim/real_fog", "mprnet/real", "refinednet/real", "tskf/real", "my1/real", "my2/real", "transweather/real"]},
   "sand": {
     "images": ["dusttornado-001.jpg", "dusttornado-002.jpg", "dusttornado-003.jpg", "dusttornado-004.jpg", "dusttornado-005.jpg"],
-    "methods": ["test/input"]},
+    "methods": ["test/sand/input", "epdn/sand", "ffa/sand", "gca_dehaze/sand", "refinednet/sand", "transweather/sand", "my1/sand", "my2/sand"]},
   "snow": {
-    "images": ["snow_storm-001.jpg", "snow_storm-002.jpg", "snow_storm-003.jpg", "snow_storm-004.jpg", "snow_storm-005.jpg"],
-    "methods": ["test/input"]},
+    "images": ["snow_storm-001.jpg", "snow_storm-002.jpg", "snow_storm-003.jpg", "snow_storm-004.jpg", "snow_storm-005.jpg", "snow_storm-006.jpg", "snow_storm-007.jpg", "snow_storm-008.jpg", "snow_storm-009.jpg", "snow_storm-010.jpg", "snow_storm-019.jpg", "snow_storm-021.jpg", "snow_storm-040.jpg", "snow_storm-044.jpg", "snow_storm-049.jpg", "snow_storm-052.jpg", "snow_storm-056.jpg", "snow_storm-059.jpg", "snow_storm-059.jpg", "snow_storm-071.jpg", "snow_storm-075.jpg", "snow_storm-077.jpg", "snow_storm-079.jpg", "snow_storm-091.jpg", "snow_storm-096.jpg", "snow_storm-107.jpg", "snow_storm-133.jpg", "snow_storm-162.jpg", "snow_storm-164.jpg","snow_storm-196.jpg", "snow_storm-219.jpg", "snow_storm-229.jpg", "snow_storm-267.jpg", "snow_storm-343.jpg", "snow_storm-362.jpg", "snow_storm-376.jpg"],
+    "methods": ["test/snow/input", "mmaxim/snow", "refinednet/snow", "transweather/snow", "tskf/snow", "desnownet/snow", "my1/snow"]},
   "Snow100K-L": {
     "images": ["beautiful_smile_00003.jpg", "beautiful_smile_00007.jpg", "beautiful_smile_00010.jpg", "beautiful_smile_00016.jpg", "beautiful_smile_00020.jpg"],
-    "methods": ["test/input"]},
+    "methods": ["test/Snow100K-L/input", "desnownet/Snow100K-L", "transweather/snowtest100k_L", "tskf/Snow100K-L"]},
   "test1": {
     "images": ["im_0301_s80_a04.png", "im_0303_s95_a05.png", "im_0304_s95_a06.png", "im_0306_s95_a04.png", "im_0310_s90_a06.png"],
-    "methods": ["test/input"]}
+    "methods": ["test/test1/input", "epdn/test1", "gca_derain/test1", "mmaxim/test1_fog", "mprnet/test1", "refinednet/test1", "transweather/test1", "tskf/test1", "my1/test1", "my2/test1"]}
 }
